@@ -103,17 +103,6 @@ Example: `spxw_tas_data_2025-12-11.csv`
 - Ensure CSV has all required columns
 - Check that data files are in same folder as `option_explorer.py`
 
----
-
-## Alternative: Online Hosting (Advanced)
-
-For users who can't install Python, consider hosting on Streamlit Cloud:
-
-1. **Create GitHub repo** with your code
-2. **Sign up:** https://streamlit.io/cloud
-3. **Deploy:** Connect your GitHub repo
-4. **Share:** Users access via URL (no install needed)
-
 **Note:** Free tier has limitations on data size and usage.
 
 ---
@@ -140,4 +129,5 @@ If you encounter issues:
 2. Verify all required files are present
 3. Ensure CSV data format is correct
 4. Try restarting the app
+
 
