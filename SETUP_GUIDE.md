@@ -22,7 +22,7 @@ This guide will help you set up the SPXW Option Explorer, even if you don't have
 
 ### Step 2: Install the App
 
-1. **Extract the app folder** to a location like `C:\SPXW_Explorer\`
+1. **Extract the app folder** to a location like `C:\users\desktop\`
 
 2. **Install dependencies:**
    - Double-click `install_dependencies.bat`
@@ -43,6 +43,7 @@ This guide will help you set up the SPXW Option Explorer, even if you don't have
 3. Run: `streamlit run option_explorer.py`
 
 ---
+
 
 
 
