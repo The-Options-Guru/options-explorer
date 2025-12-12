@@ -143,7 +143,7 @@ If data looks stale after updating CSV files, press **C** in the Streamlit app t
 
 ```bash
 # 1. Navigate to the directory
-cd C:\Users\thesh\Desktop\opt_exp
+cd C:\Users\uer#1\Desktop\opt_exp
 
 # 2. Make sure you have your CSV files
 # spxw_tas_data_2025-12-11.csv
@@ -175,3 +175,4 @@ streamlit run option_explorer.py
 ---
 
 **Made for analyzing SPXW option flow from Time & Sales data**
+
