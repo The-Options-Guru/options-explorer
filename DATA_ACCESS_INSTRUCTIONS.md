@@ -18,7 +18,6 @@ Contact the data provider to request access:
 Once approved, you'll receive:
 - Link to shared data folder (Google Drive, Dropbox, etc.)
 - Access credentials (if needed)
-- Welcome email with instructions
 
 ### Step 3: Download Data
 
@@ -229,4 +228,5 @@ Once you have access:
 ---
 
 **Ready to explore? Fire up the app and dive into the data!** 🚀
+
 
