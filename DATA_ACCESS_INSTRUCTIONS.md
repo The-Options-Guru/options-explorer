@@ -11,7 +11,7 @@ The app is free, but requires SPXW Time & Sales data files to function. Data acc
 ### Step 1: Request Access
 
 Contact the data provider to request access:
-- **[Contact information will be provided]**
+- **https://discord.gg/r7a6vawX8c**
 
 ### Step 2: Receive Access
 
@@ -229,3 +229,4 @@ Once you have access:
 ---
 
 **Ready to explore? Fire up the app and dive into the data!** 🚀
+
