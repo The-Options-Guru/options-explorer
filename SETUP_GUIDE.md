@@ -53,9 +53,7 @@ When sharing this app, include these files:
 option_explorer.py          # Main application
 requirements.txt            # Python dependencies
 README.md                   # User guide
-CLAUDE.md                   # Developer guide
-SETUP_GUIDE.md             # This file
-start_explorer.bat          # Windows startup script
+SETUP_GUIDE.md             # start_explorer.bat          # Windows startup script
 install_dependencies.bat    # Windows install script
 ```
 
@@ -142,3 +140,4 @@ If you encounter issues:
 2. Verify all required files are present
 3. Ensure CSV data format is correct
 4. Try restarting the app
+
