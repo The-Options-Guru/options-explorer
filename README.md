@@ -4,7 +4,7 @@ Interactive Streamlit application for analyzing SPXW option contracts from Time 
 
 **🆓 Free Application | 🔒 Controlled Data Access**
 
-The app is free and open-source. SPXW Time & Sales data is provided separately under controlled access.
+The app is free. SPXW Time & Sales data is provided separately under controlled access.
 
 ## Quick Start
 
@@ -175,4 +175,5 @@ streamlit run option_explorer.py
 ---
 
 **Made for analyzing SPXW option flow from Time & Sales data**
+
 
