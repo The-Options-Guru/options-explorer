@@ -1,10 +1,6 @@
 # SPXW Option Explorer
 Interactive Streamlit application for analyzing SPXW option contracts from Time & Sales data.
 
-🆓 Free Application | 🔒 Controlled Data Access
-
-The app is free. SPXW Time & Sales data is provided separately under controlled access.
-
 ## Prerequisites
 
 ### 0. Install Python (If you don't already have it)
@@ -49,30 +45,20 @@ python3 --version
 
 Just double-click `install_dependencies.bat` and wait for it to complete.
 
-**Option B: Command line**
-
-```bash
-pip install streamlit pandas numpy matplotlib seaborn
-```
-
 ### 2. Run the Application
 
 **Option A: Double-click the batch file (Easiest)**
 
-Just double-click `start_explorer.bat` - that's it!
+Just double-click `Start collector.bat` and `start_explorer.bat`- that's it!
 
-**Option B: Command line**
-
-```bash
-streamlit run option_explorer.py
-```
+Options time and sales will be saved in a new folder (historical data)
 
 The app will automatically open in your browser at http://localhost:8501
 
 ### 3. Stop the Application
 
 To stop when you're done:
-- Press `Ctrl+C` in the command window, OR
+- Press `Ctrl+C` in the both command window, OR
 - Simply close the command window
 - The browser tab can stay open or be closed
 
@@ -94,12 +80,8 @@ This tool analyzes individual SPXW option contracts and provides:
 
 ## Data Access
 
-The app requires SPXW Time & Sales data files to function.
+The app requires SPXW Time & Sales data files to function.  
 
-### Getting Data Access:
-Data files are provided separately under controlled access. To request access:
-1. See `DATA_ACCESS_INSTRUCTIONS.md` for details
-2. Once you have access, download CSV files and place them in the app folder.
 
 ### Data File Format:
 Files must be named: `spxw_tas_data_YYYY-MM-DD.csv`
@@ -144,7 +126,7 @@ Your CSV files must have these columns:
 ## Troubleshooting
 
 ### "No TAS data files found!"
-- Make sure your CSV files are in the same directory as `option_explorer.py`
+- Make sure your CSV files are in the folder `historical data`
 - Check the filename format: `spxw_tas_data_2025-12-11.csv`
 
 ### "No trades found for this symbol"
@@ -179,7 +161,7 @@ cd C:\Users\user#1\Desktop\opt_exp
 # 2. Make sure you have your CSV files
 # spxw_tas_data_2025-12-11.csv
 # spxw_tas_data_2025-12-10.csv
-# etc.
+# or run time_and_sales_collector.py to collect new TAS data
 
 # 3. Run the app
 streamlit run option_explorer.py
@@ -214,3 +196,4 @@ streamlit run option_explorer.py
 ---
 
 Made for analyzing SPXW option flow from Time & Sales data
+
