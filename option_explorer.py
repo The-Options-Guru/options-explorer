@@ -25,21 +25,29 @@ sns.set_palette("husl")
 # Constants
 OPTION_MULTIPLIER = 100
 INSTITUTIONAL_SIZE_THRESHOLD = 20  # Default value, can be adjusted in UI
+HISTORICAL_DATA_FOLDER = 'historical data'  # Folder containing TAS data files
+
+# Supported tickers and their file patterns
+TICKERS = {
+    'SPXW': 'spxw_tas_data_{date}.csv',
+    'SPY': 'spy_tas_data_{date}.csv'
+}
 
 # =====================================================
 # DATA LOADING FUNCTIONS
 # =====================================================
 
-@st.cache_data
-def get_available_dates():
-    """Scan historical_data directory for available TAS files"""
-    pattern = 'spxw_tas_data_*.csv'
+@st.cache_data(ttl=300)  # Auto-refresh every 5 minutes (300 seconds)
+def get_available_dates(ticker='SPXW'):
+    """Scan historical_data directory for available TAS files for the specified ticker"""
+    ticker_lower = ticker.lower()
+    pattern = str(Path(HISTORICAL_DATA_FOLDER) / f'{ticker_lower}_tas_data_*.csv')
     files = glob.glob(pattern)
 
     dates = []
     for file in files:
-        # Extract date from filename: spxw_tas_data_YYYY-MM-DD.csv
-        match = re.search(r'spxw_tas_data_(\d{4}-\d{2}-\d{2})\.csv', file)
+        # Extract date from filename: {ticker}_tas_data_YYYY-MM-DD.csv
+        match = re.search(rf'{ticker_lower}_tas_data_(\d{{4}}-\d{{2}}-\d{{2}})\.csv', file)
         if match:
             dates.append(match.group(1))
 
@@ -48,12 +56,13 @@ def get_available_dates():
     return dates
 
 
-@st.cache_data
-def load_tas_data(date):
-    """Load and preprocess Time & Sales data for a specific date"""
-    file_path = f'spxw_tas_data_{date}.csv'
+@st.cache_data(ttl=300)  # Auto-refresh every 5 minutes (300 seconds)
+def load_tas_data(date, ticker='SPXW'):
+    """Load and preprocess Time & Sales data for a specific date and ticker"""
+    ticker_lower = ticker.lower()
+    file_path = Path(HISTORICAL_DATA_FOLDER) / f'{ticker_lower}_tas_data_{date}.csv'
 
-    if not Path(file_path).exists():
+    if not file_path.exists():
         st.error(f"File not found: {file_path}")
         st.stop()
 
@@ -89,16 +98,17 @@ def load_tas_data(date):
 # OPTION SYMBOL FUNCTIONS
 # =====================================================
 
-def construct_option_symbol(strike, option_type, expiry_date):
-    """Construct SPXW option symbol from components
+def construct_option_symbol(strike, option_type, expiry_date, ticker='SPXW'):
+    """Construct option symbol from components (supports both SPXW and SPY)
 
     Args:
-        strike: Strike price (e.g., 6775)
+        strike: Strike price (e.g., 6775 for SPXW, 600 for SPY)
         option_type: 'CALL' or 'PUT'
         expiry_date: 'YYYY-MM-DD' format
+        ticker: 'SPXW' or 'SPY'
 
     Returns:
-        Symbol like '.SPXW251211C6775'
+        Symbol like '.SPXW251211C6775' or 'SPY251219C600'
     """
     try:
         # Parse date
@@ -111,7 +121,11 @@ def construct_option_symbol(strike, option_type, expiry_date):
         # Format strike as integer
         strike_str = str(int(strike))
 
-        return f'.SPXW{yymmdd}{cp}{strike_str}'
+        # Construct symbol based on ticker
+        if ticker == 'SPXW':
+            return f'.SPXW{yymmdd}{cp}{strike_str}'
+        else:  # SPY and other tickers
+            return f'{ticker}{yymmdd}{cp}{strike_str}'
 
     except ValueError as e:
         st.error(f"Invalid date format: {e}")
@@ -119,18 +133,33 @@ def construct_option_symbol(strike, option_type, expiry_date):
 
 
 def parse_option_symbol(symbol):
-    """Parse SPXW option symbol into components
+    """Parse option symbol into components (supports both SPXW and SPY formats)
 
-    Pattern: \.([A-Z]+)(W)?(\d{6})([CP])(\d+)
+    SPXW Pattern: \.SPXW(\d{6})([CP])(\d+)
+    SPY Pattern: SPY\s*(\d{6})([CP])(\d+)
     """
-    match = re.match(r'\.([A-Z]+)(W)?(\d{6})([CP])(\d+)', str(symbol))
+    symbol_str = str(symbol).strip()
+
+    # Try SPXW pattern (with leading dot)
+    match = re.match(r'\.([A-Z]+)(W)?(\d{6})([CP])(\d+)', symbol_str)
     if match:
         return {
-            'ticker': match.group(1),
+            'ticker': match.group(1) + (match.group(2) or ''),  # SPX + W = SPXW
             'expiry_str': match.group(3),
             'strike': float(match.group(5)),
             'option_type': 'CALL' if match.group(4) == 'C' else 'PUT'
         }
+
+    # Try SPY pattern (without leading dot, may have spaces)
+    match = re.match(r'([A-Z]+)\s*(\d{6})([CP])(\d+)', symbol_str)
+    if match:
+        return {
+            'ticker': match.group(1),
+            'expiry_str': match.group(2),
+            'strike': float(match.group(4)),
+            'option_type': 'CALL' if match.group(3) == 'C' else 'PUT'
+        }
+
     return None
 
 
@@ -351,32 +380,52 @@ def identify_institutional_trades(df, size_threshold=INSTITUTIONAL_SIZE_THRESHOL
 
 def parse_option_symbol_full(symbol):
     """
-    Parse SPXW option symbol with full component extraction
+    Parse option symbol with full component extraction (supports both SPXW and SPY)
 
     Args:
-        symbol: Option symbol (e.g., '.SPXW251211C6880')
+        symbol: Option symbol (e.g., '.SPXW251211C6880' or 'SPY251219C600')
 
     Returns:
         dict with keys: ticker, expiry_str, expiry_date, strike, option_type
         Returns None if parsing fails
     """
-    match = re.match(r'\.([A-Z]+)(W)?(\d{6})([CP])(\d+)', str(symbol))
-    if not match:
-        return None
+    symbol_str = str(symbol).strip()
 
-    expiry_str = match.group(3)  # YYMMDD
-    try:
-        expiry_date = datetime.strptime(f"20{expiry_str}", "%Y%m%d").date()
-    except:
-        expiry_date = None
+    # Try SPXW pattern (with leading dot)
+    match = re.match(r'\.([A-Z]+)(W)?(\d{6})([CP])(\d+)', symbol_str)
+    if match:
+        expiry_str = match.group(3)  # YYMMDD
+        try:
+            expiry_date = datetime.strptime(f"20{expiry_str}", "%Y%m%d").date()
+        except:
+            expiry_date = None
 
-    return {
-        'ticker': match.group(1),
-        'expiry_str': expiry_str,
-        'expiry_date': expiry_date,
-        'strike': float(match.group(5)),
-        'option_type': 'C' if match.group(4) == 'C' else 'P'
-    }
+        return {
+            'ticker': match.group(1) + (match.group(2) or ''),
+            'expiry_str': expiry_str,
+            'expiry_date': expiry_date,
+            'strike': float(match.group(5)),
+            'option_type': 'C' if match.group(4) == 'C' else 'P'
+        }
+
+    # Try SPY pattern (without leading dot, may have spaces)
+    match = re.match(r'([A-Z]+)\s*(\d{6})([CP])(\d+)', symbol_str)
+    if match:
+        expiry_str = match.group(2)  # YYMMDD
+        try:
+            expiry_date = datetime.strptime(f"20{expiry_str}", "%Y%m%d").date()
+        except:
+            expiry_date = None
+
+        return {
+            'ticker': match.group(1),
+            'expiry_str': expiry_str,
+            'expiry_date': expiry_date,
+            'strike': float(match.group(4)),
+            'option_type': 'C' if match.group(3) == 'C' else 'P'
+        }
+
+    return None
 
 
 def identify_2leg_spread(trade1, trade2):
@@ -1292,13 +1341,31 @@ def analyze_expiry_breakdown(df):
 def render_sidebar():
     """Render sidebar with all input controls"""
 
-    st.sidebar.title("SPXW Option Explorer")
+    st.sidebar.title("Option Explorer")
+    st.sidebar.markdown("---")
+
+    # Ticker selector
+    ticker = st.sidebar.radio(
+        "Ticker",
+        options=list(TICKERS.keys()),
+        index=0,
+        horizontal=True,
+        help="Select underlying ticker (SPX or SPY)"
+    )
+
+    st.sidebar.markdown("---")
+
+    # Refresh button
+    if st.sidebar.button("🔄 Refresh Data", help="Manually refresh data from files"):
+        st.cache_data.clear()
+        st.rerun()
+
     st.sidebar.markdown("---")
 
     # Date selector
-    dates = get_available_dates()
+    dates = get_available_dates(ticker)
     if not dates:
-        st.sidebar.error("No TAS data files found!")
+        st.sidebar.error(f"No {ticker} TAS data files found!")
         st.stop()
 
     selected_date = st.sidebar.selectbox(
@@ -1308,14 +1375,27 @@ def render_sidebar():
         help="Select trading date to analyze"
     )
 
-    # Strike input
+    # Strike input (different defaults for different tickers)
+    if ticker == 'SPXW':
+        default_strike = 6800
+        min_strike = 1000
+        max_strike = 10000
+        step = 5
+        example = "6800"
+    else:  # SPY
+        default_strike = 680
+        min_strike = 100
+        max_strike = 1000
+        step = 1
+        example = "680"
+
     strike = st.sidebar.number_input(
         "Strike Price",
-        min_value=1000,
-        max_value=10000,
-        value=6800,
-        step=5,
-        help="Enter strike price (e.g., 6800)"
+        min_value=min_strike,
+        max_value=max_strike,
+        value=default_strike,
+        step=step,
+        help=f"Enter strike price (e.g., {example})"
     )
 
     # Call/Put selector
@@ -1359,6 +1439,7 @@ def render_sidebar():
         time_range = (start_time, end_time)
 
     return {
+        'ticker': ticker,
         'selected_date': selected_date,
         'strike': strike,
         'option_type': option_type,
@@ -1423,22 +1504,22 @@ def main():
 
     # Page config
     st.set_page_config(
-        page_title="SPXW Option Explorer",
+        page_title="Option Explorer",
         page_icon="📊",
         layout="wide"
     )
 
-    # Title
-    st.title("SPXW Option Explorer")
-    st.markdown("Interactive analysis tool for individual SPXW option contracts from Time & Sales data")
-    st.markdown("---")
-
-    # Render sidebar and get inputs
+    # Render sidebar and get inputs (must be before title to get ticker)
     inputs = render_sidebar()
+
+    # Title (dynamic based on selected ticker)
+    st.title(f"{inputs['ticker']} Option Explorer")
+    st.markdown(f"Interactive analysis tool for individual {inputs['ticker']} option contracts from Time & Sales data")
+    st.markdown("---")
 
     # Load data
     with st.spinner("Loading Time & Sales data..."):
-        tas_data = load_tas_data(inputs['selected_date'])
+        tas_data = load_tas_data(inputs['selected_date'], inputs['ticker'])
 
     # === DAILY OVERVIEW SECTION ===
     with st.expander("📊 Daily Session Overview - Top Strikes", expanded=False):
