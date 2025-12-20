@@ -49,7 +49,7 @@ Just double-click `install_dependencies.bat` and wait for it to complete.
 
 **Option A: Double-click the batch file (Easiest)**
 
-Just double-click `Start collector.bat` and `start_explorer.bat`- that's it!
+Just double-click `start_time_and_sales.bat` and `start_explorer.bat`- that's it!
 
 Options time and sales will be saved in a new folder (historical data)
 
@@ -80,7 +80,7 @@ This tool analyzes individual SPXW option contracts and provides:
 
 ## Data Access
 
-The app requires SPXW Time & Sales data files to function.  
+The app requires Time & Sales data files to function.  
 
 
 ### Data File Format:
@@ -196,4 +196,5 @@ streamlit run option_explorer.py
 ---
 
 Made for analyzing SPXW option flow from Time & Sales data
+
 
