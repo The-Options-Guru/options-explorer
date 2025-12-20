@@ -29,8 +29,9 @@ This guide will help you set up the SPXW Option Explorer, even if you don't have
    - Wait for it to complete (takes 2-5 minutes)
 
 3. **Run the app:**
-   - Double-click `start_explorer.bat`
+   - Double-click   `start_time_and_sales.bat` and `start_explorer.bat`
    - App will open in your browser at http://localhost:8501
+   - 2 terminals `1 for SPX and 1 for SPY` will open and start collecting time and sales data
 
 ---
 
@@ -43,6 +44,7 @@ This guide will help you set up the SPXW Option Explorer, even if you don't have
 3. Run: `streamlit run option_explorer.py`
 
 ---
+
 
 
 
