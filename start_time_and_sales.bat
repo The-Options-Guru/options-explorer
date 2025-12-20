@@ -13,7 +13,7 @@ set /a START_MINUTE=45
 REM ========================================
 
 echo ========================================
-echo SPXW Time and Sales Collector
+echo SPXW and SPY Time and Sales Collectors
 echo Auto-start: %START_HOUR%:%START_MINUTE%
 echo ========================================
 echo.
@@ -56,12 +56,16 @@ if !CURRENT_TOTAL! LSS !START_TOTAL! (
 
 REM Start collecting
 echo.
-echo Starting collector at !HOUR!:!MINUTE!
-echo Press Ctrl+C in the collector window to stop when done
+echo Starting collectors at !HOUR!:!MINUTE!
+echo Press Ctrl+C in each collector window to stop when done
 echo.
 
-python time_and_sales_collector.py
+REM Start SPXW collector in new window
+start "SPXW Collector" python spxw_time_and_sales.py
+
+REM Start SPY collector in new window
+start "SPY Collector" python spy_time_and_sales.py
 
 echo.
-echo Collector stopped.
+echo Both collectors started in separate windows.
 pause
